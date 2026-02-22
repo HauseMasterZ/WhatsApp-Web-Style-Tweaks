@@ -4,10 +4,11 @@ function applyStyles() {
     '#app div._aigw._as6h.false',
     '#app div[class~="x12xzxwr"][class~="x9f619"]',
     '#app div[class~="x10l6tqk"][class~="x13vifvy"]',
-    '#app div[class~="x1n2onr6"][class~="x1vjfegm"][class~="x1cqoux5"][class~="x14yy4lh"]'
+    '#app div[class~="x1n2onr6"][class~="x1vjfegm"][class~="x1cqoux5"][class~="x14yy4lh"]',
+    '#app div[class~="x10l6tqk"][class~="x13vifvy"][class~="x1ey2m1c"][class~="xhtitgo"]'
   ].forEach((sel, i) => {
     document.querySelectorAll(sel).forEach(el => {
-      if (i === 0) {
+      if (i === 0 || i === 5) {
         el.style.setProperty('display', 'none');
       } else if (i === 1 || i === 2) {
         el.style.setProperty('border', 'none');
@@ -21,17 +22,15 @@ function applyStyles() {
   });
 }
 
-// ✅ Wait for WhatsApp to fully load by polling for #app
 function waitForWhatsApp() {
   return new Promise(resolve => {
     const interval = setInterval(() => {
-      // WhatsApp is ready when #app has children and the side panel exists
       const ready = document.querySelector('#app div[data-tab="2"], #app ._aigw');
       if (ready) {
         clearInterval(interval);
         resolve();
       }
-    }, 500); // check every 500ms
+    }, 500);
   });
 }
 
@@ -40,12 +39,24 @@ function waitForWhatsApp() {
   applyStyles();
 
   let debounceTimer;
-  const observer = new MutationObserver(() => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(applyStyles, 30);
+
+  // ✅ Fast observer on #main — fires immediately on chat switch
+  const mainObserver = new MutationObserver(() => {
+    applyStyles(); // no debounce — #main changes are rare and meaningful
   });
 
-  observer.observe(document.body, {
+  const main = document.getElementById('main');
+  if (main) {
+    mainObserver.observe(main, { childList: true, subtree: true });
+  }
+
+  // ✅ Slower debounced observer on body — catches style resets
+  const bodyObserver = new MutationObserver(() => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(applyStyles, 10); // reduced from 30ms → 10ms
+  });
+
+  bodyObserver.observe(document.body, {
     childList: true,
     subtree: true,
     attributes: true,
