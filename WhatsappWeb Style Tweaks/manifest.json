@@ -1,7 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "WhatsApp Style Tweaks",
-  "version": "1.0",
+  "name": "WhatsApp Wide Layout",
+  "version": "1.5",
+  "description": "Hides nav icon rail, keeps chat list, collapses nav rail space, shrinks right panel to 10px, expands conversation to full width, caps bubbles at 50vw.",
+  "permissions": [],
   "content_scripts": [
     {
       "matches": ["https://web.whatsapp.com/*"],
